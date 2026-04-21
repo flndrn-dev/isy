@@ -5,9 +5,9 @@ import './globals.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://isy.chat'),
-  title: 'ISY — I Seek You, reborn.',
+  title: 'ISY® — I Seek You, reborn.',
   description:
-    'ISY is a modern, EU-built, end-to-end encrypted messenger. Your UIN is yours forever.',
+    'ISY® is a modern, EU-built, end-to-end encrypted messenger. Your UIN is yours forever.',
   icons: {
     icon: '/favicon.svg',
   },

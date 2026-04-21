@@ -7,5 +7,11 @@
   "status.away": "Away",
   "status.dnd": "Do not disturb",
   "status.invisible": "Invisible",
-  "status.offline": "Offline"
+  "status.offline": "Offline",
+  "status.fun": "Having fun at a party",
+  "status.sleep": "Sleeping",
+  "status.birthday": "It's my birthday!",
+  "status.working": "Working hard",
+  "status.studying": "Studying hard",
+  "status.gaming": "Gaming"
 }
