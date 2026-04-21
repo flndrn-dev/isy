@@ -1,0 +1,11 @@
+{
+  "common.appName": "ISY",
+  "common.tagline": "I Seek You — reborn.",
+  "common.domain": "isy.chat",
+  "splash.comingSoon": "coming soon",
+  "status.online": "Online",
+  "status.away": "Away",
+  "status.dnd": "Do not disturb",
+  "status.invisible": "Invisible",
+  "status.offline": "Offline"
+}

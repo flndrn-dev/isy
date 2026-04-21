@@ -1,0 +1,23 @@
+{
+  "name": "isy",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ISY — end-to-end encrypted messenger with UIN identity",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @isy/web dev",
+    "dev:desktop": "echo 'apps/desktop not scaffolded yet' && exit 1",
+    "dev:mobile": "echo 'apps/mobile not scaffolded yet' && exit 1",
+    "build": "pnpm --filter @isy/web build",
+    "build:desktop": "echo 'apps/desktop not scaffolded yet' && exit 1",
+    "build:apk": "echo 'apps/mobile not scaffolded yet' && exit 1",
+    "typecheck": "pnpm -r typecheck",
+    "test": "echo 'vitest not configured yet' && exit 0",
+    "e2e": "echo 'playwright not configured yet' && exit 0",
+    "convex:dev": "echo 'convex/ not scaffolded yet' && exit 1",
+    "convex:deploy": "echo 'convex/ not scaffolded yet' && exit 1"
+  }
+}

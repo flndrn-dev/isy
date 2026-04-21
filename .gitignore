@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# local state
+*.sqlite
+*.sqlite-*
+.DS_Store
+
+# env
+.env
+.env.local
+.env.*.local
+
+# brainstorming artifacts
+.superpowers/
+
+# editor
+.vscode/
+.idea/
+*.swp
