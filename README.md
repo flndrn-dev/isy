@@ -2,10 +2,6 @@
 
 Modern, EU-built, end-to-end encrypted messenger with UIN identity. Operated by flndrn Limited (Cyprus).
 
-Authoritative spec: [docs/CLAUDE.md](docs/CLAUDE.md).
-Product requirements: [docs/PRD.md](docs/PRD.md).
-Build plan: [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
-
 ## Status
 
 Phase 0 — web MVP scaffold. Splash page only. No Convex, no auth, no Tauri, no Capacitor yet.
