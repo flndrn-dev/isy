@@ -18,8 +18,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "echo 'playwright not configured yet' && exit 0",
-    "convex:dev": "echo 'convex/ not scaffolded yet' && exit 1",
-    "convex:deploy": "echo 'convex/ not scaffolded yet' && exit 1",
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy",
     "convex:codegen": "convex codegen"
   },
   "devDependencies": {
