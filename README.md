@@ -13,5 +13,3 @@ pnpm install
 pnpm dev              # runs web app at http://localhost:3000
 pnpm typecheck        # full monorepo typecheck
 ```
-
-See [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md) for the full roadmap.
