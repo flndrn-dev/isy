@@ -155,3 +155,67 @@ describe.skip('uins.allocate [requires Convex codegen]', () => {
     expect(uins.size).toBe(100)
   })
 })
+
+describe.skip('uins.lookupByUin [requires Convex codegen]', () => {
+  test('returns the uin row when it exists', async () => {
+    const t = convexTest(schema)
+    const userId = await t.mutation(api.dev.createTestUser, { email: 'e@test.com' })
+    const uin = await t.mutation(api.uins.allocate, { userId })
+
+    const row = await t.query(api.uins.lookupByUin, { uin })
+    expect(row).not.toBeNull()
+    expect(row!.uin).toBe(uin)
+    expect(row!.ownerId).toBe(userId)
+  })
+
+  test('returns null for a nonexistent uin', async () => {
+    const t = convexTest(schema)
+    const row = await t.query(api.uins.lookupByUin, { uin: 123_456_789n })
+    expect(row).toBeNull()
+  })
+})
+
+describe.skip('uins.lookupPrimaryByOwner [requires Convex codegen]', () => {
+  test('returns the primary uin row for a user', async () => {
+    const t = convexTest(schema)
+    const userId = await t.mutation(api.dev.createTestUser, { email: 'f@test.com' })
+    const uin = await t.mutation(api.uins.allocate, { userId })
+
+    const row = await t.query(api.uins.lookupPrimaryByOwner, { userId })
+    expect(row).not.toBeNull()
+    expect(row!.uin).toBe(uin)
+    expect(row!.isPrimary).toBe(true)
+  })
+
+  test('returns null if the user has no primary uin', async () => {
+    const t = convexTest(schema)
+    const userId = await t.mutation(api.dev.createTestUser, { email: 'g@test.com' })
+
+    const row = await t.query(api.uins.lookupPrimaryByOwner, { userId })
+    expect(row).toBeNull()
+  })
+})
+
+describe.skip('uins.poolStats [requires Convex codegen]', () => {
+  test('returns zero counts on an empty database', async () => {
+    const t = convexTest(schema)
+    const stats = await t.query(api.uins.poolStats, {})
+    expect(stats.total).toBe(0)
+    expect(stats.owned).toBe(0)
+    expect(stats.available).toBe(0)
+    expect(stats.canary).toBe(0)
+    expect(stats.retired).toBe(0)
+    expect(stats.reserved).toBe(0)
+  })
+
+  test('counts allocated UINs as owned', async () => {
+    const t = convexTest(schema)
+    for (let i = 0; i < 3; i++) {
+      const userId = await t.mutation(api.dev.createTestUser, { email: `h${i}@test.com` })
+      await t.mutation(api.uins.allocate, { userId })
+    }
+    const stats = await t.query(api.uins.poolStats, {})
+    expect(stats.total).toBe(3)
+    expect(stats.owned).toBe(3)
+  })
+})

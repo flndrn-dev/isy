@@ -6,7 +6,7 @@
  * for the full data model and allocation policy.
  */
 
-import { mutation } from './_generated/server'
+import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
 
 // Allowed random-draw sub-ranges, per spec §6.1:
@@ -87,5 +87,56 @@ export const allocate = mutation({
       return candidate
     }
     throw new Error('UIN allocation failed after 20 attempts — pool may be exhausted')
+  },
+})
+
+/**
+ * Look up a UIN row by its numeric value. Public-safe:
+ * returns the row or null.
+ */
+export const lookupByUin = query({
+  args: { uin: v.int64() },
+  handler: async (ctx, { uin }) => {
+    return await (ctx.db.query('uins') as any)
+      .withIndex('by_uin', (q: any) => q.eq('uin', uin))
+      .first()
+  },
+})
+
+/**
+ * Look up the primary UIN row belonging to a given user.
+ * Returns null if the user has no primary UIN (unallocated or post-deletion).
+ */
+export const lookupPrimaryByOwner = query({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    return await (ctx.db.query('uins') as any)
+      .withIndex('by_owner_primary', (q: any) =>
+        q.eq('ownerId', userId).eq('isPrimary', true)
+      )
+      .first()
+  },
+})
+
+/**
+ * Admin-only pool statistics. Cheap O(N) table scan — acceptable at scope-A
+ * scale. Replace with an aggregated counter table in Phase 2 if N grows large.
+ */
+export const poolStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query('uins').collect()
+    const counts = {
+      total: all.length,
+      available: 0,
+      owned: 0,
+      reserved: 0,
+      retired: 0,
+      canary: 0,
+    }
+    for (const row of all as any[]) {
+      counts[row.status as keyof typeof counts]++
+    }
+    return counts
   },
 })
