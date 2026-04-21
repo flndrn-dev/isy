@@ -21,6 +21,10 @@ build/
 # brainstorming artifacts
 .superpowers/
 
+# Claude Code local artifacts
+.claude.md
+.claude/
+
 # editor
 .vscode/
 .idea/
