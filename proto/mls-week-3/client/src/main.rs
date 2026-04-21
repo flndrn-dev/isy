@@ -91,7 +91,7 @@ async fn main() -> Result<()> {
             commands::inbox::run(my_uin, &db).await?;
         }
         Command::Remove { my_uin, peer_uin, db } => {
-            tracing::info!("TODO: remove my_uin={} peer_uin={} db={}", my_uin, peer_uin, db);
+            commands::remove::run(my_uin, peer_uin, &db).await?;
         }
         Command::Poc => {
             mls_poc::run_poc()?;
