@@ -1,5 +1,6 @@
 //! `send` command: encrypt a plaintext for the single local MLS group and
-//! push the resulting ciphertext to the peer's Convex inbox.
+//! push the resulting ciphertext to every group member's Convex inbox
+//! (except ourselves).
 //!
 //! 1. Open the SQLite-backed OpenMLS provider.
 //! 2. Look up our own UIN record on Convex to get our public signature key,
@@ -7,8 +8,11 @@
 //! 3. Find the single group in the sidecar table (prototype assumption:
 //!    exactly one group per device; warn if more).
 //! 4. Encrypt with `MlsGroup::create_message`, serialize via
-//!    `tls_serialize_detached`, and submit through `messages:submitCiphertext`
-//!    with `peer_uin` as the recipient.
+//!    `tls_serialize_detached`, and fan out through `messages:submitCiphertext`
+//!    to every other group member. The `--peer-uin` CLI flag is used only
+//!    as a "which group" hint for the one-group-per-device prototype and is
+//!    verified to be a member; the ciphertext itself is an MLS group message
+//!    that all members must receive in order to decrypt.
 
 use anyhow::{anyhow, Context, Result};
 use openmls::prelude::{tls_codec::Serialize as _, *};
@@ -80,24 +84,57 @@ pub async fn run(my_uin: u64, peer_uin: u64, message: &str, db: &str) -> Result<
         .tls_serialize_detached()
         .map_err(|e| anyhow!("serializing message: {:?}", e))?;
 
-    // Submit to Convex.
+    // Collect all other group members — MLS application messages are
+    // encrypted to the group, so every member except us must receive the
+    // bytes in order to decrypt. `peer_uin` serves only as a "which group"
+    // hint for the one-group-per-device prototype.
     let group_id_vec = group.group_id().to_vec();
-    client
-        .mutation(
-            "messages:submitCiphertext",
-            json!({
-                "recipientUin": peer_uin,
-                "senderUin": my_uin,
-                "groupId": bytes_to_json(&group_id_vec),
-                "ciphertext": bytes_to_json(&ciphertext),
-            }),
-        )
-        .await
-        .context("submitting ciphertext")?;
+    let recipients: Vec<u64> = group
+        .members()
+        .filter_map(|m| {
+            let cred = m.credential.serialized_content();
+            if cred.len() != 8 {
+                return None;
+            }
+            let mut arr = [0u8; 8];
+            arr.copy_from_slice(cred);
+            let uin = u64::from_be_bytes(arr);
+            if uin == my_uin {
+                None
+            } else {
+                Some(uin)
+            }
+        })
+        .collect();
+
+    if !recipients.contains(&peer_uin) {
+        return Err(anyhow!(
+            "UIN {} is not a member of this group; cannot send",
+            peer_uin
+        ));
+    }
+
+    // Submit to Convex once per recipient.
+    let recipient_count = recipients.len();
+    for recipient in recipients {
+        client
+            .mutation(
+                "messages:submitCiphertext",
+                json!({
+                    "recipientUin": recipient,
+                    "senderUin": my_uin,
+                    "groupId": bytes_to_json(&group_id_vec),
+                    "ciphertext": bytes_to_json(&ciphertext),
+                }),
+            )
+            .await
+            .context("submitting ciphertext")?;
+    }
 
     let gid_preview = hex::encode(&group_id_vec[..8.min(group_id_vec.len())]);
     tracing::info!(
-        "Encrypted and submitted 1 ciphertext for group [{}]",
+        "Encrypted and submitted {} ciphertext for group [{}]",
+        recipient_count,
         gid_preview
     );
 
