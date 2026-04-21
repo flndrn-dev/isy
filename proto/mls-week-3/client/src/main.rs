@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
             commands::register::run(uin, &db).await?;
         }
         Command::Add { my_uin, peer_uin, db } => {
-            tracing::info!("TODO: add my_uin={} peer_uin={} db={}", my_uin, peer_uin, db);
+            commands::add::run(my_uin, peer_uin, &db).await?;
         }
         Command::Send { my_uin, peer_uin, message, db } => {
             tracing::info!(
