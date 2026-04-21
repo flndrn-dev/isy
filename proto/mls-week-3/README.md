@@ -9,9 +9,12 @@ See execution spec: [../../docs/superpowers/specs/2026-04-21-mls-prototype-execu
 
 ## Quick start
 
+Run all commands from inside `proto/mls-week-3/`. The `--ignore-workspace` flag on `pnpm install` is required: without it, pnpm walks up to the repo-root `pnpm-workspace.yaml` and treats this directory as part of the monorepo, installing nothing locally.
+
 ```bash
-# one-time: install deps, auth Convex, create isy-dev project
-pnpm install              # inside proto/mls-week-3/
+# one-time: install isolated deps, auth Convex, create isy-dev project
+cd proto/mls-week-3
+pnpm install --ignore-workspace
 npx convex dev            # interactive — first run authenticates, later runs hot-push schema changes
 
 # build the Rust CLI
