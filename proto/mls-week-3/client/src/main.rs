@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+mod convex_client;
 mod mls_poc;
 
 #[derive(Parser)]
@@ -58,6 +59,9 @@ enum Command {
     /// Hidden: run in-memory MLS proof-of-concept (Alice+Bob, no Convex).
     #[command(hide = true)]
     Poc,
+    /// Hidden: smoke-test Convex connectivity by calling uins:lookupUin for a nonexistent UIN.
+    #[command(hide = true)]
+    Ping,
 }
 
 #[tokio::main]
@@ -92,6 +96,13 @@ async fn main() -> Result<()> {
         }
         Command::Poc => {
             mls_poc::run_poc()?;
+        }
+        Command::Ping => {
+            let client = convex_client::ConvexClient::from_env()?;
+            let result = client
+                .query("uins:lookupUin", serde_json::json!({"uin": 999999999}))
+                .await?;
+            tracing::info!("convex ping result: {:?}", result);
         }
     }
 
