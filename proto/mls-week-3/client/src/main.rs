@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+mod commands;
 mod convex_client;
 mod mls_poc;
 mod storage;
@@ -78,7 +79,7 @@ async fn main() -> Result<()> {
 
     match cli.command {
         Command::Register { uin, db } => {
-            tracing::info!("TODO: register uin={} db={}", uin, db);
+            commands::register::run(uin, &db).await?;
         }
         Command::Add { my_uin, peer_uin, db } => {
             tracing::info!("TODO: add my_uin={} peer_uin={} db={}", my_uin, peer_uin, db);

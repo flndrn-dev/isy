@@ -12,7 +12,8 @@
 //!   error   -> {"status":"error","errorMessage": "..."}
 //!
 //! This module provides a small wrapper plus base64 helpers for `v.bytes()`
-//! fields, which Convex represents as base64 strings in the JSON transport.
+//! fields, which Convex represents as `{"$bytes": "<base64>"}` envelopes in
+//! the JSON transport.
 
 use anyhow::{anyhow, Context, Result};
 use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
@@ -106,15 +107,29 @@ impl ConvexClient {
 }
 
 /// Convert a byte slice into the JSON representation Convex accepts for
-/// `v.bytes()` fields (base64 string).
+/// `v.bytes()` fields.
+///
+/// Convex's JSON transport wraps bytes in a `{"$bytes": "<base64>"}` envelope
+/// rather than using a bare base64 string; see
+/// `convex/dist/esm/values/value.js` lines 108-213 for the reference
+/// JS implementation. A bare base64 string fails server-side validation with
+/// `ArgumentValidationError: Value does not match validator. Validator: v.bytes()`.
 pub fn bytes_to_json(b: &[u8]) -> Value {
-    Value::String(B64.encode(b))
+    json!({ "$bytes": B64.encode(b) })
 }
 
-/// Extract bytes from a Convex `v.bytes()` JSON value (base64 string).
+/// Extract bytes from a Convex `v.bytes()` JSON value.
+///
+/// Accepts both the wrapped form `{"$bytes": "<base64>"}` that Convex emits
+/// and a bare base64 string, for robustness.
 pub fn json_to_bytes(v: &Value) -> Result<Vec<u8>> {
-    let s = v
-        .as_str()
-        .ok_or_else(|| anyhow!("expected base64 string, got {}", v))?;
+    let s = if let Some(obj) = v.as_object() {
+        obj.get("$bytes")
+            .and_then(Value::as_str)
+            .ok_or_else(|| anyhow!("expected {{$bytes: string}}, got {}", v))?
+    } else {
+        v.as_str()
+            .ok_or_else(|| anyhow!("expected base64 string or $bytes object, got {}", v))?
+    };
     B64.decode(s).map_err(|e| anyhow!("base64 decode failed: {}", e))
 }
