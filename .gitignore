@@ -25,6 +25,10 @@ build/
 .claude.md
 .claude/
 
+# internal specs and governance — not for public visibility
+CLAUDE.md
+docs/
+
 # editor
 .vscode/
 .idea/
