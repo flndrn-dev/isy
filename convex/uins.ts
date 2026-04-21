@@ -6,6 +6,9 @@
  * for the full data model and allocation policy.
  */
 
+import { mutation } from './_generated/server'
+import { v } from 'convex/values'
+
 // Allowed random-draw sub-ranges, per spec §6.1:
 //   [100_000_100, 700_000_000)  size 599_999_900
 //   [700_000_100, 1_000_000_000) size 299_999_900
@@ -25,3 +28,64 @@ export function pickCandidate(): bigint {
     ? LOW_POOL_START + r
     : HIGH_POOL_START + (r - LOW_POOL_SIZE)
 }
+
+/**
+ * Allocate a random standard-class UIN to a verified user.
+ *
+ * Preconditions (throws on violation):
+ *   - user exists
+ *   - user.emailVerifiedAt is set (non-null)
+ *   - user does not already have a primary UIN
+ *
+ * On success:
+ *   - Inserts a new 'uins' row with status='owned', class='standard', isPrimary=true
+ *   - Patches users[userId] with status='active' and updatedAt
+ *   - Returns the allocated UIN as bigint
+ *
+ * Atomicity: Convex mutations are transactional end-to-end; the collision check
+ * and insert happen inside one transaction. No locks required.
+ */
+export const allocate = mutation({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId)
+    if (!user) throw new Error('user not found')
+    if (user.emailVerifiedAt == null) throw new Error('email not verified')
+
+    // Idempotency: has this user already got a primary UIN?
+    // Casts to `any` are required while `_generated/` is stale (Doc = any,
+    // so withIndex's type signature only knows system indexes). Remove when
+    // Convex dev regenerates `_generated/` from our real schema.
+    const existingPrimary = await (ctx.db.query('uins') as any)
+      .withIndex('by_owner_primary', (q: any) =>
+        q.eq('ownerId', userId).eq('isPrimary', true)
+      )
+      .first()
+    if (existingPrimary) throw new Error('user already has a UIN')
+
+    const MAX_ATTEMPTS = 20
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+      const candidate = pickCandidate()
+      const taken = await (ctx.db.query('uins') as any)
+        .withIndex('by_uin', (q: any) => q.eq('uin', candidate))
+        .first()
+      if (taken) continue
+
+      const now = Date.now()
+      await ctx.db.insert('uins', {
+        uin: candidate,
+        ownerId: userId,
+        class: 'standard',
+        status: 'owned',
+        isPrimary: true,
+        acquiredAt: now,
+        acquisitionTransactionId: undefined,
+        retiredAt: undefined,
+        allocatedAt: now,
+      })
+      await ctx.db.patch(userId, { status: 'active', updatedAt: now })
+      return candidate
+    }
+    throw new Error('UIN allocation failed after 20 attempts — pool may be exhausted')
+  },
+})
