@@ -28,3 +28,15 @@ cargo build --release
 
 - **Pass:** tag `proto-mls-passing-v1`, archive demo recording at `docs/proofs/mls-week-3-pass.mp4` on `main`, proceed to weeks 4-5 planning
 - **Fail:** write `POSTMORTEM.md` in this directory, stop, re-plan
+
+## Kill test result (Task 15)
+
+On 2026-04-21, the kill test was executed against the live `isy-dev` Convex deployment. Alice (UIN 600000001) submitted one MLS-encrypted message with the unique plaintext marker `KILL_TEST_MARKER_ABC123_the_quick_brown_fox_jumps_over`. The corresponding row in the Convex `messages` table was inspected via the HTTP `messages:fetchCiphertext` mutation with full project-admin access:
+
+- **Ciphertext byte length:** 199
+- **First 32 bytes (hex):** `0001000210ca9ed2e8c631bd1829929b792b1a397f000000000000000301001c` — MLS wire-format header (version `0001`, wire format `0002` = PrivateMessage, group ID `ca9ed2e8c631bd18…`, epoch 3, content type Application). This header is routing metadata, not content.
+- **Plaintext marker `KILL_TEST_MARKER`:** not present.
+- **Substrings `quick_brown_fox` / `ABC123` / `fox`:** not present.
+- **Printable-ASCII runs ≥ 4 chars found in the entire 199-byte payload:** exactly 3, all of 4–5 characters, all random (`'U|vy.'`, `'fd+u'`, `'-eA@R'`).
+
+Success criterion #8 from `docs/MLS_PROTOTYPE.md` — "taking a Convex export of the messages table, with full root-level Convex permissions, produces only ciphertext blobs that no tool can decrypt without the device-side keys" — holds.
