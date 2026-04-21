@@ -1,0 +1,22 @@
+# rust
+target/
+Cargo.lock.bak
+
+# node
+node_modules/
+
+# env (NEVER commit — contains live Convex deploy key)
+.env.local
+.env.*.local
+
+# convex generated
+convex/_generated/
+
+# local MLS state
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# macos
+.DS_Store

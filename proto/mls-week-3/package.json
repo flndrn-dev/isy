@@ -1,0 +1,14 @@
+{
+  "name": "isy-proto-mls-week-3",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway prototype proving MLS E2EE works against Convex. Do not merge to main.",
+  "scripts": {
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy"
+  },
+  "devDependencies": {
+    "convex": "^1.35.1"
+  }
+}
