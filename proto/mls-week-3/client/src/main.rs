@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 
 mod convex_client;
 mod mls_poc;
+mod storage;
 
 #[derive(Parser)]
 #[command(name = "isy-proto", about = "ISY MLS Week-3 prototype CLI")]
