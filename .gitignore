@@ -33,3 +33,6 @@ docs/
 .vscode/
 .idea/
 *.swp
+
+# convex generated
+convex/_generated/

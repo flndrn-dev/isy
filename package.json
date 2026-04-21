@@ -15,12 +15,17 @@
     "build:desktop": "echo 'apps/desktop not scaffolded yet' && exit 1",
     "build:apk": "echo 'apps/mobile not scaffolded yet' && exit 1",
     "typecheck": "pnpm -r typecheck",
-    "test": "echo 'vitest not configured yet' && exit 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "e2e": "echo 'playwright not configured yet' && exit 0",
-    "convex:dev": "echo 'convex/ not scaffolded yet' && exit 1",
-    "convex:deploy": "echo 'convex/ not scaffolded yet' && exit 1"
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy",
+    "convex:codegen": "convex codegen"
   },
   "devDependencies": {
-    "convex": "^1.35.1"
+    "@edge-runtime/vm": "^5.0.0",
+    "convex": "^1.35.1",
+    "convex-test": "^0.0.49",
+    "vitest": "^2"
   }
 }
