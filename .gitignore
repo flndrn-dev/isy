@@ -25,6 +25,9 @@ build/
 .claude.md
 .claude/
 
+# docs — tracked files retain, but new docs won't auto-stage (add with -f if needed)
+docs/
+
 # editor
 .vscode/
 .idea/
