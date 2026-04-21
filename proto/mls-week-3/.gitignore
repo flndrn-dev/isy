@@ -12,6 +12,12 @@ node_modules/
 # convex generated
 convex/_generated/
 
+# convex AI tooling (auto-regenerates on `convex dev` — not prototype code)
+AGENTS.md
+CLAUDE.md
+.agents/
+skills-lock.json
+
 # local MLS state
 *.sqlite
 *.sqlite-journal
