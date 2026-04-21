@@ -85,13 +85,10 @@ async fn main() -> Result<()> {
             commands::add::run(my_uin, peer_uin, &db).await?;
         }
         Command::Send { my_uin, peer_uin, message, db } => {
-            tracing::info!(
-                "TODO: send my_uin={} peer_uin={} msg_len={} db={}",
-                my_uin, peer_uin, message.len(), db
-            );
+            commands::send::run(my_uin, peer_uin, &message, &db).await?;
         }
         Command::Inbox { my_uin, db } => {
-            tracing::info!("TODO: inbox my_uin={} db={}", my_uin, db);
+            commands::inbox::run(my_uin, &db).await?;
         }
         Command::Remove { my_uin, peer_uin, db } => {
             tracing::info!("TODO: remove my_uin={} peer_uin={} db={}", my_uin, peer_uin, db);
