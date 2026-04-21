@@ -1,6 +1,8 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+mod mls_poc;
+
 #[derive(Parser)]
 #[command(name = "isy-proto", about = "ISY MLS Week-3 prototype CLI")]
 struct Cli {
@@ -53,6 +55,9 @@ enum Command {
         #[arg(long)]
         db: String,
     },
+    /// Hidden: run in-memory MLS proof-of-concept (Alice+Bob, no Convex).
+    #[command(hide = true)]
+    Poc,
 }
 
 #[tokio::main]
@@ -84,6 +89,9 @@ async fn main() -> Result<()> {
         }
         Command::Remove { my_uin, peer_uin, db } => {
             tracing::info!("TODO: remove my_uin={} peer_uin={} db={}", my_uin, peer_uin, db);
+        }
+        Command::Poc => {
+            mls_poc::run_poc()?;
         }
     }
 
