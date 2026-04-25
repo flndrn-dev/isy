@@ -11,7 +11,7 @@
  * - Convex _creationTime auto-field → explicit created_at bigint (ms epoch)
  *   where the source table had no explicit created/updated fields.
  */
-import { bigint, boolean, schema, table, text } from '@briven/schema';
+import { bigint, boolean, schema, table, text } from '@briven/cli/schema';
 
 export default schema({
   users: table({

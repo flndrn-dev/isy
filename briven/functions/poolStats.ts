@@ -5,7 +5,7 @@
  * a count-by-class / count-by-status aggregate. Success = briven
  * runtime can execute this and return JSON.
  */
-import type { Ctx } from '@briven/schema';
+import { query, type Ctx } from '@briven/cli/server';
 
 const UIN_CLASSES = [
   'standard',
@@ -31,7 +31,7 @@ interface UinRow {
   status: (typeof UIN_STATUSES)[number];
 }
 
-export default async function poolStats(ctx: Ctx) {
+export default query(async (ctx: Ctx) => {
   const all = (await ctx.db('uins').select(['id', 'class', 'status'])) as UinRow[];
 
   const byClass = Object.fromEntries(UIN_CLASSES.map((c) => [c, 0])) as Record<
@@ -49,4 +49,4 @@ export default async function poolStats(ctx: Ctx) {
   }
 
   return { total: all.length, byClass, byStatus };
-}
+});
